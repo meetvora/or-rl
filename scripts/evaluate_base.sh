@@ -45,7 +45,7 @@ trap stop_heartbeat EXIT
 args=(
   -m src.eval
   --model_name_or_path "${MODEL_NAME_OR_PATH:-Qwen/Qwen3.5-2B}" \
-  --eval_dir "${EVAL_DIR:-data/eval/responses}" \
+  --eval_dir "${EVAL_DIR:-data/eval/complex_or_eval.jsonl}" \
   --output_path "${OUTPUT_PATH:-outputs/baseline_eval.jsonl}" \
   --code_timeout_seconds "${CODE_TIMEOUT_SECONDS:-300}" \
   --answer_tolerance "${ANSWER_TOLERANCE:-1e-6}" \

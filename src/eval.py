@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+from collections import Counter
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -104,7 +105,7 @@ def evaluate_response(
     code_exec_answer = None
     if exec_result is not None and exec_result.success:
         code_exec_answer = exec_result.stdout
-    return {
+    result = {
         "id": example.id,
         "prompt": example.prompt,
         "response": response,
@@ -121,10 +122,38 @@ def evaluate_response(
         "answer_correct": answer_matches(extracted, example.true_answer, answer_tolerance),
         "error": exec_result.error if exec_result else ("no code extracted" if code is None else None),
     }
+    result["failure_type"] = classify_failure(result)
+    return result
+
+
+def classify_failure(result: dict) -> Optional[str]:
+    if result.get("answer_correct"):
+        return None
+    error = (result.get("error") or "").lower()
+    stderr = (result.get("stderr") or "").lower()
+    extracted_code = result.get("extracted_code")
+    if not extracted_code:
+        return "no_code_extracted"
+    if "invalid python syntax" in error or "syntaxerror" in stderr:
+        return "syntax_error"
+    if result.get("execution_timeout"):
+        return "execution_timeout"
+    if result.get("return_code") not in (0, None):
+        return "runtime_error"
+    if result.get("execution_success") and result.get("extracted_answer") is None:
+        return "answer_parse_failure"
+    if result.get("execution_success"):
+        return "wrong_answer"
+    if error:
+        return "execution_validation_failure"
+    if result.get("extracted_answer") is None:
+        return "answer_parse_failure"
+    return "unknown_failure"
 
 
 def compute_metrics(results: list[dict]) -> dict:
     total = len(results) or 1
+    failure_counts = Counter(r.get("failure_type") or "correct" for r in results)
     return {
         "num_examples": len(results),
         "answer_accuracy": sum(bool(r["answer_correct"]) for r in results) / total,
@@ -136,6 +165,10 @@ def compute_metrics(results: list[dict]) -> dict:
         / total,
         "timeout_ratio": sum(bool(r["execution_timeout"]) for r in results) / total,
         "parse_failure_ratio": sum(r["extracted_answer"] is None for r in results) / total,
+        "failure_type_counts": dict(sorted(failure_counts.items())),
+        "failure_type_ratios": {
+            key: value / total for key, value in sorted(failure_counts.items())
+        },
     }
 
 
@@ -256,6 +289,7 @@ def run_evaluation(args: argparse.Namespace) -> tuple[list[dict], dict]:
                 "answer_correct": False,
                 "error": str(exc),
             }
+            result["failure_type"] = classify_failure(result)
 
         results.append(result)
 
@@ -273,7 +307,7 @@ def run_evaluation(args: argparse.Namespace) -> tuple[list[dict], dict]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Evaluate OR-Tools code-generation model.")
     parser.add_argument("--model_name_or_path", default="Qwen/Qwen3.5-2B")
-    parser.add_argument("--eval_dir", default="data/eval/responses")
+    parser.add_argument("--eval_dir", default="data/eval/complex_or_eval.jsonl")
     parser.add_argument("--output_path", default="outputs/baseline_eval.jsonl")
     parser.add_argument("--code_timeout_seconds", type=int, default=120)
     parser.add_argument("--answer_tolerance", type=float, default=1e-6)

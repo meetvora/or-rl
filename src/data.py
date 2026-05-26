@@ -152,7 +152,9 @@ def _load_eval_jsonl(path: Path, max_remaining: Optional[int]) -> list[Normalize
                 skipped["bad_json"] = skipped.get("bad_json", 0) + 1
                 continue
             prompt = raw.get("question") or raw.get("prompt") or raw.get("problem_statement")
-            true_answer = _first_numeric(raw.get("answer") or raw.get("true_answer"))
+            true_answer = _first_numeric(
+                raw.get("answer_json", raw.get("answer", raw.get("true_answer")))
+            )
             if not prompt or true_answer is None:
                 skipped["missing_required"] = skipped.get("missing_required", 0) + 1
                 continue
@@ -204,7 +206,7 @@ def _load_eval_response(path: Path) -> Optional[NormalizedExample]:
 
 
 def load_eval_examples(
-    eval_dir: str | Path = "data/eval/responses",
+    eval_dir: str | Path = "data/eval/complex_or_eval.jsonl",
     max_examples: Optional[int] = None,
 ) -> list[NormalizedExample]:
     examples: list[NormalizedExample] = []
@@ -248,7 +250,7 @@ def build_sft_text(example: NormalizedExample) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Inspect normalized OR-RL datasets.")
     parser.add_argument("--train_path", default="data/train/complex_or_variations.jsonl")
-    parser.add_argument("--eval_dir", default="data/eval/responses")
+    parser.add_argument("--eval_dir", default="data/eval/complex_or_eval.jsonl")
     parser.add_argument("--eval_split_ratio", type=float, default=0.1)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--max_train_examples", type=int)
