@@ -64,12 +64,12 @@ python -m src.train_rlvr \
   --generation_preview_chars "${GENERATION_PREVIEW_CHARS:-500}" \
   --max_train_examples "${MAX_TRAIN_EXAMPLES:-1800}" \
   --resume_step "${RESUME_STEP:-0}" \
-  --save_steps "${SAVE_STEPS:-5}" \
-  --save_total_limit "${SAVE_TOTAL_LIMIT:-0}" \
+  --save_steps "${SAVE_STEPS:-20}" \
+  --save_total_limit "${SAVE_TOTAL_LIMIT:-5}" \
   --resume_from_checkpoint "${RESUME_FROM_CHECKPOINT:-}" \
-  --per_device_train_batch_size "${PER_DEVICE_TRAIN_BATCH_SIZE:-1}" \
-  --gradient_accumulation_steps "${GRADIENT_ACCUMULATION_STEPS:-1}" \
-  --num_train_epochs "${NUM_TRAIN_EPOCHS:-1}" \
+  --per_device_train_batch_size "${PER_DEVICE_TRAIN_BATCH_SIZE:-2}" \
+  --gradient_accumulation_steps "${GRADIENT_ACCUMULATION_STEPS:-2}" \
+  --num_train_epochs "${NUM_TRAIN_EPOCHS:-2}" \
   --max_prompt_length "${MAX_PROMPT_LENGTH:-2048}" \
   --max_completion_length "${MAX_COMPLETION_LENGTH:-1024}" \
   --num_generations "${NUM_GENERATIONS:-3}" 2>&1 | tee -a "$train_log_path" &

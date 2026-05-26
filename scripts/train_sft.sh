@@ -51,7 +51,7 @@ python -m src.train_sft \
   --num_train_epochs "${NUM_TRAIN_EPOCHS:-3}" \
   --per_device_train_batch_size "${PER_DEVICE_TRAIN_BATCH_SIZE:-1}" \
   --gradient_accumulation_steps "${GRADIENT_ACCUMULATION_STEPS:-8}" \
-  --learning_rate "${LEARNING_RATE:-2e-5}" \
+  --learning_rate "${LEARNING_RATE:-1e-4}" \
   --max_seq_length "${MAX_SEQ_LENGTH:-4096}" &
 
 train_pid="$!"
