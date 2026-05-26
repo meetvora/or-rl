@@ -1,0 +1,16 @@
+pandas>=2.2,<3
+numpy>=1.26,<2
+datasets>=2.19.0
+huggingface_hub>=1.0,<2
+openai
+python-dotenv
+ortools>=9.10
+transformers @ git+https://github.com/huggingface/transformers.git
+accelerate
+peft>=0.14,<0.20
+trl==0.14.0
+vllm==0.10.2
+bitsandbytes
+flash-linear-attention
+sentencepiece
+safetensors
