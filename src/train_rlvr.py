@@ -235,6 +235,7 @@ def main() -> None:
         use_cache=True,
         report_to="none",
         seed=args.seed,
+        temperature=0.7
     )
     phase_start = log_phase("build_training_args", phase_start)
 
@@ -262,6 +263,7 @@ def main() -> None:
         logger.info("trainer_generation_config_use_cache=%s", trainer.generation_config.use_cache)
     phase_start = log_phase("build_trainer", phase_start)
     log_trainable_parameters(trainer.model)
+    logger.info("resume_from_checkpoint=%s", resume_from_checkpoint or "none")
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
     Path(args.output_dir).mkdir(parents=True, exist_ok=True)
     trainer.save_model(args.output_dir)
