@@ -173,6 +173,43 @@ def _load_eval_jsonl(path: Path, max_remaining: Optional[int]) -> list[Normalize
     return examples
 
 
+def load_eval_response_examples(
+    path: str | Path,
+    max_examples: Optional[int] = None,
+) -> list[NormalizedExample]:
+    path = Path(path)
+    examples: list[NormalizedExample] = []
+    skipped: dict[str, int] = {}
+    with path.open("r", encoding="utf-8") as f:
+        for line_no, line in enumerate(f, start=1):
+            if max_examples is not None and len(examples) >= max_examples:
+                break
+            try:
+                raw = json.loads(line)
+            except json.JSONDecodeError:
+                skipped["bad_json"] = skipped.get("bad_json", 0) + 1
+                continue
+            prompt = raw.get("prompt") or raw.get("problem_statement") or raw.get("question")
+            true_answer = _first_numeric(raw.get("true_answer") or raw.get("answer_json") or raw.get("answer"))
+            response = raw.get("response") or raw.get("baseline_response") or raw.get("completion")
+            if not prompt or true_answer is None or response is None:
+                skipped["missing_required"] = skipped.get("missing_required", 0) + 1
+                continue
+            example_id = str(raw.get("id") or f"{path.stem}:{line_no}")
+            examples.append(
+                NormalizedExample(
+                    id=example_id,
+                    prompt=str(prompt),
+                    reference_code=None,
+                    true_answer=true_answer,
+                    metadata={"source": str(path), "line_no": line_no, "raw": raw},
+                )
+            )
+    if skipped:
+        logger.warning("Skipped response JSONL rows from %s: %s", path, skipped)
+    return examples
+
+
 def _load_eval_response(path: Path) -> Optional[NormalizedExample]:
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))

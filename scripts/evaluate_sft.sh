@@ -47,6 +47,7 @@ args=(
   --model_name_or_path "${MODEL_NAME_OR_PATH:-outputs/sft_adapter}" \
   --eval_dir "${EVAL_DIR:-data/eval/complex_or_eval.jsonl}" \
   --output_path "${OUTPUT_PATH:-outputs/sft_eval.jsonl}" \
+  --responses_path "${RESPONSES_PATH:-outputs/sft_eval.responses.jsonl}" \
   --code_timeout_seconds "${CODE_TIMEOUT_SECONDS:-120}" \
   --answer_tolerance "${ANSWER_TOLERANCE:-1e-6}" \
   --max_new_tokens "${MAX_NEW_TOKENS:-8192}" \
@@ -55,7 +56,7 @@ args=(
 )
 if [[ "$load_in_4bit" == "true" ]]; then args+=(--load_in_4bit); fi
 if [[ "$load_in_8bit" == "true" ]]; then args+=(--load_in_8bit); fi
-if [[ "${EVALUATE_CACHED_RESPONSES:-false}" == "true" ]]; then args+=(--evaluate_cached_responses); fi
+if [[ "${PRECOMPUTE_RESPONSES:-false}" == "true" ]]; then args+=(--precompute_responses); fi
 if [[ "${PARTIAL_RUN:-false}" == "true" ]]; then args+=(--partial_run); fi
 if [[ -n "${MAX_EVAL_EXAMPLES:-}" ]]; then args+=(--max_eval_examples "$MAX_EVAL_EXAMPLES"); fi
 
