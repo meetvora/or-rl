@@ -240,7 +240,7 @@ As expected, I observed the following transitions in model behavior:
 
 To be honest, these results were disappointing. I was hoping for few correct answers, especially given that I found multiple correct-answer-rewards in the training logs. From logs, I could decipher that SFT and RLVR improved the mechanics of code generation: syntax errors dropped sharply, formatting became more consistent, and OR-Tools usage became much more reliable. However, the gains did not translate cleanly into final answer accuracy. Many samples either failed at runtime or executed successfully but encoded the wrong model and returned an incorrect answer.
 
-<img src="assets/plot.png" alt="PCA projection comparing synthetic training data and OPTEngine evaluation data" width="700">
+<img src="assets/pca_plot.png" alt="PCA projection comparing synthetic training data and OPTEngine evaluation data" width="700">
 
 Hypothesis: The model had learned the outer shape of the solution, but not enough of the underlying optimization semantics to transfer to the evaluation set. To test this, I embedded the training and evaluation problems into 2D space. The plot showed only minor overlap between the synthetic training distribution and the evaluation distribution. That made the poor results less surprising: the evaluation set was not only held out, it was also out-of-distribution relative to the data used for SFT and RL.
 
