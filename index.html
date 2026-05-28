@@ -222,7 +222,7 @@
     </style>
   </head>
   <body>
-    <main class="markdown-body">
+    <main>
       <header class="page-header">
         <div class="page-title">
           <h1>Solving OR Problems With Small Language Models</h1>
@@ -233,8 +233,10 @@
         </div>
       </header>
 
-      {% capture readme %}{% include_relative README.md %}{% endcapture %}
-      {{ readme | markdownify }}
+      <div class="markdown-body">
+        {% capture readme %}{% include_relative README.md %}{% endcapture %}
+        {{ readme | markdownify }}
+      </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
