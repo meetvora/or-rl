@@ -51,7 +51,7 @@ def format_prompt(tokenizer, problem: str) -> str:
             [{"role": "user", "content": user}],
             tokenize=False,
             add_generation_prompt=True,
-    )
+        )
     return user
 
 def generate_response_candidates_batch(
@@ -91,19 +91,19 @@ def generate_response_candidates_batch(
             gen_kwargs["num_return_sequences"] = num_samples_per_prompt
         outputs = model.generate(**inputs, **gen_kwargs)
 
-    prompt_lengths = inputs["attention_mask"].sum(dim=1).tolist()
+    prompt_prefix_len = inputs["input_ids"].shape[1]
     responses: list[list[str]] = [[] for _ in prompts]
     if do_sample and num_samples_per_prompt > 1:
-        for prompt_index, prompt_length in enumerate(prompt_lengths):
+        for prompt_index in range(len(prompts)):
             base = prompt_index * num_samples_per_prompt
             for sample_index in range(num_samples_per_prompt):
                 output = outputs[base + sample_index]
-                generated = output[prompt_length:]
+                generated = output[prompt_prefix_len:]
                 responses[prompt_index].append(tokenizer.decode(generated, skip_special_tokens=True))
     else:
-        for prompt_index, prompt_length in enumerate(prompt_lengths):
+        for prompt_index in range(len(prompts)):
             output = outputs[prompt_index]
-            generated = output[prompt_length:]
+            generated = output[prompt_prefix_len:]
             responses[prompt_index].append(tokenizer.decode(generated, skip_special_tokens=True))
     return responses
 
@@ -540,6 +540,11 @@ def main() -> None:
     parser.add_argument("--load_in_8bit", action="store_true")
     parser.add_argument("--responses_path", default="outputs/eval_responses.jsonl")
     parser.add_argument("--precompute_responses", action="store_true")
+    parser.add_argument("--do_sample", action="store_true")
+    parser.add_argument("--num_samples_per_prompt", type=int, default=1)
+    parser.add_argument("--temperature", type=float, default=1.0)
+    parser.add_argument("--top_p", type=float, default=1.0)
+    parser.add_argument("--pass_k", type=int, default=5)
     parser.add_argument("--log_level", default="INFO")
     parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--generation_log_path")

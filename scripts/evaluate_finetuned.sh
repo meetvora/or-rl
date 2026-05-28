@@ -52,10 +52,15 @@ args=(
   --answer_tolerance "${ANSWER_TOLERANCE:-1e-6}" \
   --max_new_tokens "${MAX_NEW_TOKENS:-8192}" \
   --batch_size "${BATCH_SIZE:-16}" \
-  --generation_log_path "${GENERATION_LOG_PATH:-logs/evaluate_finetuned_generations.jsonl}"
+  --generation_log_path "${GENERATION_LOG_PATH:-logs/evaluate_finetuned_generations.jsonl}" \
+  --pass_k "${PASS_K:-5}" \
+  --num_samples_per_prompt "${NUM_SAMPLES_PER_PROMPT:-${PASS_K:-5}}"
 )
+if [[ "${DO_SAMPLE:-true}" == "true" || "${NUM_SAMPLES_PER_PROMPT:-${PASS_K:-5}}" -gt 1 ]]; then args+=(--do_sample); fi
 if [[ "$load_in_4bit" == "true" ]]; then args+=(--load_in_4bit); fi
 if [[ "$load_in_8bit" == "true" ]]; then args+=(--load_in_8bit); fi
+if [[ -n "${TEMPERATURE:-}" ]]; then args+=(--temperature "$TEMPERATURE"); fi
+if [[ -n "${TOP_P:-}" ]]; then args+=(--top_p "$TOP_P"); fi
 if [[ "${PRECOMPUTE_RESPONSES:-false}" == "true" ]]; then args+=(--precompute_responses); fi
 if [[ "${PARTIAL_RUN:-false}" == "true" ]]; then args+=(--partial_run); fi
 if [[ -n "${MAX_EVAL_EXAMPLES:-}" ]]; then args+=(--max_eval_examples "$MAX_EVAL_EXAMPLES"); fi
